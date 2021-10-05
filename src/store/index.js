@@ -1,5 +1,7 @@
 import { createStore } from 'vuex';
 import axios from 'axios';
+import character from './modules/character.js';
+import episode from './modules/episode.js';
 
 export default createStore({
     state: {
@@ -10,7 +12,7 @@ export default createStore({
     },
     getters: {
         allCharacters(state) {
-            return state.characters
+            return state.characters;
         }
     },
     mutations: {
@@ -44,7 +46,10 @@ export default createStore({
                 ctx.commit('updateCharacters', data.results);
                 ctx.commit('setProcessLoadingCharacters', false);
             });
-        },
+        }
     },
-    modules: {}
+    modules: {
+        character,
+        episode
+    }
 });
