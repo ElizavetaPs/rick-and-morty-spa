@@ -1,10 +1,10 @@
 <template>
     <div v-if="!$store.state.isLoadingCharacter">
         <div class="rounded border-2 border-gray-200 flex m-5">
-            <img class="w-80" :src="character.image" alt="Sunset in the mountains">
+            <img class="w-80" :src="character.image" :alt="character.name">
             <div class="px-6 py-4">
                 <div class="font-bold text-4xl mb-2">
-                    {{character.name}}
+                    {{ character.name }}
                 </div>
                 <div>
                     <p class="text-gray-700 text-base font-bold text-xl">Разновидность:</p>

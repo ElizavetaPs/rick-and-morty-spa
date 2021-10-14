@@ -1,19 +1,38 @@
 <template>
     <div class="bg-blue-300 p-5 flex justify-between items-center">
         <div class="flex">
-            <div class="flex">
-                <input 
-                type="text" 
+            <input 
+                type="text"
+                v-model="filteredName"
                 placeholder="Имя персонажа"
                 class="block w-60 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                >
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-3">
-                    Поиск
-                </button>
-            </div>
-            <select class="block w-60 ml-8 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                <option>Other</option>
+            >
+            <select 
+                v-model="filteredStatus"
+                class="block w-60 ml-3 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+            >
+                <option value="" selected>Не выбрано</option>
+                <option value="alive">alive</option>
+                <option value="dead">dead</option>
+                <option value="unknown">unknown</option>
             </select>
+            <button 
+                @click="filterCharacters"
+                :disabled="$store.state.isFilteringCharacters"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-3"
+            >
+                Поиск
+            </button>
+            <button 
+                @click="resetFilters"
+                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-3"
+                v-if="filteredName || filteredStatus"
+            >
+                Сброс фильтров
+            </button>
+            <div class="ml-3" v-if="$store.state.isFilteringCharacters">
+                <Loader />
+            </div>
         </div>
     </div>
     <div class="p-5 flex flex-wrap">
@@ -45,26 +64,65 @@
 </template>
 
 <script>
-    import { mapGetters, mapActions } from 'vuex';
+    import { mapMutations, mapGetters, mapActions } from 'vuex';
     import Loader from '../components/Loader.vue';
     import CharacterCard from '../components/CharacterCard.vue';
 
     export default {
         name: 'Main',
+        data() {
+            return {
+                filteredName: '',
+                filteredStatus: '',
+            }
+        },
         components: {
             CharacterCard,
             Loader
         },
         computed: {
-            ...mapGetters([
-            'allCharacters'
-            ]),
+            ...mapGetters([ 'allCharacters']),
+            
             hasNextPage() {
-            const { currentPage, totalPages } = this.$store.state;
-            return currentPage < totalPages;
+                const { page, totalPages } = this.$store.state;
+                return page < totalPages;
             }
         },
-        methods: mapActions(['getCharacters', 'loadNextCharacters']),
+        methods: {
+            ...mapActions(['getCharacters', 'loadNextCharacters', 'getFilteredCharacters']),
+            ...mapMutations(['addFilterParam', 'clearFilters']),
+
+            filterCharacters() {
+                if (!this.filteredName && !this.filteredStatus) {
+                    this.$router.replace({
+                        query: {}
+                    });
+                    this.clearFilters();
+                    this.getCharacters();
+                } else {
+                    this.$router.replace({
+                        query: {
+                            name: this.filteredName ? this.filteredName : null,
+                            status: this.filteredStatus ? this.filteredStatus : null
+                        }
+                    });
+                    this.$store.commit('addFilterParam', {
+                        name: this.filteredName,
+                        status: this.filteredStatus
+                    });
+                    this.getFilteredCharacters();
+                }
+            },
+            resetFilters() {
+                this.filteredName = '';
+                this.filteredStatus = '';
+                this.$router.replace({
+                    query: {}
+                });
+                this.clearFilters();
+                this.getCharacters();
+            }
+        },
         async mounted() {
             await this.getCharacters();
         }

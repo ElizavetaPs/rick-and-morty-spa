@@ -1,6 +1,6 @@
 <template>
     <div class="max-w-sm rounded shadow-lg flex w-1/3 m-5">
-        <img class="w-80 h-auto" :src="imageLink" alt="Sunset in the mountains">
+        <img class="w-80 h-auto" :src="imageLink" :alt="name">
         <div class="px-6 py-4">
             <router-link 
                 :to="{ name: 'character', params: {id} }"
